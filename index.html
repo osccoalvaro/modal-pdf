@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Ajustado al Ancho</title>
+    <title>PDF Alta Resolución</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
     <style>
         #pdf-container {
@@ -20,7 +20,7 @@
     </style>
 </head>
 <body>
-    <h1>PDF Ajustado al Ancho</h1>
+    <h1>PDF con Alta Resolución en Móviles</h1>
     <div id="pdf-container"></div>
 
     <script>
@@ -33,23 +33,26 @@
         pdfjsLib.getDocument(url).promise.then(pdf => {
             for (let i = 1; i <= pdf.numPages; i++) {
                 pdf.getPage(i).then(page => {
-                    // Obtener el contenedor y calcular la escala
                     const viewport = page.getViewport({ scale: 1 });
                     const containerWidth = container.offsetWidth; // Ancho del contenedor
                     const scale = containerWidth / viewport.width; // Escala para ajustar al ancho
+                    const outputScale = window.devicePixelRatio || 1; // Ajustar según la densidad de píxeles del dispositivo
 
                     // Crear el canvas
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
 
-                    // Redimensionar el canvas según la nueva escala
+                    // Ajustar el tamaño del canvas para alta resolución
                     const scaledViewport = page.getViewport({ scale });
-                    canvas.width = scaledViewport.width;
-                    canvas.height = scaledViewport.height;
+                    canvas.width = Math.floor(scaledViewport.width * outputScale);
+                    canvas.height = Math.floor(scaledViewport.height * outputScale);
+                    canvas.style.width = `${scaledViewport.width}px`;
+                    canvas.style.height = `${scaledViewport.height}px`;
 
                     const renderContext = {
                         canvasContext: context,
-                        viewport: scaledViewport
+                        viewport: scaledViewport,
+                        transform: [outputScale, 0, 0, outputScale, 0, 0], // Renderización en alta densidad
                     };
 
                     container.appendChild(canvas);
