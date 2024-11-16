@@ -1,18 +1,56 @@
-
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Visor de PDF con Scroll</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+        #pdf-container {
+            width: 100%;
+            height: 600px;
+            overflow-y: scroll;
+            border: 1px solid black;
+        }
+        .pdf-page {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
+    <h1>Visor de PDF con Scroll</h1>
+    <div id="pdf-container"></div>
 
-    <embed src="assets/doc/boletin.pdf#zoom=125" type="application/pdf" width="100%" height="380px" >
-    <iframe src="assets/doc/boletin.pdf#zoom=125" width="100%" height="600px"></iframe>    
-    
-    <embed src="assets/doc/boletin.pdf" type="application/pdf" width="50%" height="380px" >
-        <iframe src="assets/doc/boletin.pdf" width="50%" height="600px"></iframe> 
+    <script>
+        const url = 'assets/doc/boletin.pdf';
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        const container = document.getElementById('pdf-container');
+
+        // Cargar y renderizar el PDF
+        pdfjsLib.getDocument(url).promise.then(pdf => {
+            for (let i = 1; i <= pdf.numPages; i++) {
+                // Renderizar cada página
+                pdf.getPage(i).then(page => {
+                    const viewport = page.getViewport({ scale: 0.6 });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    canvas.classList.add('pdf-page');
+
+                    container.appendChild(canvas);
+
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
